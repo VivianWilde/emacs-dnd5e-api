@@ -1,0 +1,49 @@
+#+TITLE: 5e SRD API Interface
+
+* COMMENT SRD API interface
+Can we use macros to dynamically define functions? I think we can. Or alternatively, we could just use HOFs to build a bunch of API interface functions. I think macros are nice, actually.
+Because we can have a macro that creates new functions with a unified naming convention and then call those. Actually, naming functions using macros is tricky.
+
+#+begin_src elisp
+
+;; (message "%s" (pp-to-string (srd-handle "/api/traits")))
+#+end_src
+OK, new plan. our new-assoc is a hashtable
+*** Modular/Local Copies
+Make it modular, so we can swap out backends moderately easily.
+Local copy lets users add homebrew rules, etc
+Base URL is a defcustom.
+*** How the API works
+- GET api/{field}/{index} gets the {field} data for the object at {index}. Index isn't really an index, more of a short ID.
+- GET api/{field}/{index}/{subfield} retrieves only subfields of a given index
+- Sometimes we can do nested subfield queries
+- GET api/{field} without an index returns a list of references to other entries in the DB.
+- Look into graphql to see if that makes the interface less boilerplatey. It seems to be promising, since it's very pattern-matchey. With this plus syntax rules, I think I'm just in love with functional pattern matching.
+*** Using it
+Basically, we need a convenient syntax to go from something like class:ranger to a way to pull it up in the SRD or the API.
+Basic syntax is <field>:<index> and optional subfields.
+
+An idea is a dynamic block SRD_ITEM or similar, with parameters for object_type and short_name/index. Then, to evaluate this dynamic block, we query from the SRD and insert it.
+*** COMMENT Consult/Helm/generic
+Completing-read takes a prompt and a collection of items. We can basically cache the /list/ of fields and the /list/ of refs for a given field. Save them to a file for persistence, and save the filename as a defcustom or something.
+https://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/ describes a helm source. I think a macro can go from a prompt to a helm source easily enough, or a macro can construct both. Actually scratch that, helm provides a helm-comp-read function which has the same interface as completing-read.
+So we can basically define a function ~srd-search~. If called with no arguments, run completing-read over possible fields. Based on that, or based on the argument passed in, call ~srd-search-subfield~ with the appropriate subfield name passed in as a symbol or a string. We can specify that the ~interactive~ form includes a func which returns a string, and we can do some modification to have that string passed as an arg to subfield-search.
+NOTE: Cacheing list of results might be unnecessary. Test that.
+Then we can define functions that do specific searches easily.
+#+begin_src elisp
+(defun srd-search (&optional subfield query)
+  (interactive "do a completing-read over possible subfields" (completing-read "Search for a: " dnd-subfield-list))
+  (let ((url (concat srd-base-url subfield)))
+    )
+  )
+#+end_src
+Completing-read returns the choice which was selected, so save that to a variable and do fun stuff with it
+** Org-Mode Info Notes
+*** Org-info manual
+A6 Dynamic Blocks
+A10 Property API lets us do sophisticated getting and setting of properties for files, headings, TODO items, etc.
+** Reading
+- Embark
+- Completing-read
+- Pointer/markers: Basically point to a pos between two chars in a buffer.
+- Moving pointersmarkers programatically, or spinning up new ones as we need them.
