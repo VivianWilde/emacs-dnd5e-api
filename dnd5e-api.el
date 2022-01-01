@@ -10,7 +10,7 @@
 ;; Version: 0.0.1
 ;; Keywords: abbrev bib c calendar comm convenience data docs emulations extensions faces files frames games hardware help hypermedia i18n internal languages lisp local maint mail matching mouse multimedia news outlines processes terminals tex tools unix vc wp
 ;; Homepage: https://github.com/rohan/dnd5e-api
-;; Package-Requires: ((emacs "25.1") (seq "0.0") ('plz "0.0") ('ht "0.0"))
+;;  Package-Requires: ((emacs "25.1") (seq "0.0") ('plz "0.0") ('ht "0.0"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -26,10 +26,6 @@
 
                                         ; Variable Declarations
 (defvar dnd5e-api-base-url "http://localhost:3000")
-(defvar dnd5e-api-cutoff 20
-
-"If the returned list is > cutoff, we assume it is a list to be browsed via 'completing-read, otherwise we simply display it. Based on the number of keys for a spell entry in the API"
-  )
 
 (defvar dnd5e-api-endpoint-field-hash
   #s(hash-table
@@ -75,10 +71,17 @@
 
 (defun dnd5e-api-output (result)
   "Format and output the alist RESULT."
-  (message "%s" (pp-to-string result))
+  ;; TODO: Popup rules
+  (with-current-buffer (get-buffer-create (concat "*dnd5e-api-results-" (downcase (alist-get 'name result)) "*"))
+    (visual-line-mode 1)
+    (erase-buffer)
+    (insert (pp-to-string result))
+    (display-buffer (current-buffer))
+
+    )
+  ;; (message "%s" (pp-to-string result))
   )
-
-
+(set-popup-rule! (rx bol "*dnd5e-api-results") :size 0.35 :quit t :select t :ttl nil)
                                         ; API Utilities
 (defun dnd5e-api-get-response (endpoint)
   "One-liner to go from ENDPOINT to a URL"
@@ -139,7 +142,7 @@
 (defun dnd5e-api-handle-list (endpoint)
   "Prompt user with a list of all items at ENDPOINT, and then get data for the selected item."
   (let* (
-         (fields (gethash endpoint dnd5e-api-endpoint-field-hash '(name desc))) ; NOTE: Should this be (name desc) or just nil?
+         (fields (gethash endpoint dnd5e-api-endpoint-field-hash '())) ; NOTE: Should this be (name desc) or just nil?
          (new-endpoint (dnd5e-api-ask-for-item endpoint))
          )
     (dnd5e-api-get new-endpoint fields)))
@@ -163,16 +166,14 @@
     )
   )
 
-                                        ; Put off until tomorrow TODO
-;; (defun dnd5e-api-get-list (endpoint)
-;;   "Instead of using completing read, simply return the list of items at ENDPOINT.")
-
+;;;###autoload
 (defun dnd5e-api-custom ()
   "Let users pick a custom endpoint and do stuff there."
   (interactive)
   (let* (
          (endpoint (read-string "Endpoint: "))
          (data (dnd5e-api-get-response endpoint))
+         ;; Check if result is a list of API references, or if it's actual content.
          (result (cond
                   ((assoc 'results data) (dnd5e-api-handle-list endpoint))
                   ((dnd5e-api-handle-entity endpoint))))
@@ -181,15 +182,17 @@
     )
 
   )
-
-
+                                       ; Put off until tomorrow TODO
 (defun dnd5e-api-process-response (alist)
   "Do simple cleanup on ALIST like turn desc from a vector into a string. Only called on filtered alists, for efficiency and convenience."
   (seq-map #'dnd5e-api-process-pair alist
            )
   )
+
+
 ;;  Define simple processors for things like cost, other common models. Also turning desc from a vector into a string
 ;; Once we have the cleaned up assoc-list, we basically need to format it to text and then display it.
+
 
 
 (provide 'dnd5e-api)

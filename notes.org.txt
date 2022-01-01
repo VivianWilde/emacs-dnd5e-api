@@ -1,6 +1,15 @@
 #+TITLE: 5e SRD API Interface
 * <2022-01-01 Sat> Problem-Solving
 ** Output
+Messages buffer doesn't work.
+So what we have to do is define our own ghost buffer, write the pretty-printed text to there, then pull that buffer up in a pop-up window the way ~SPC h e~ does in doom.
+Dynamic sizing is on the wishlist.
+
+Basically, the way it's done in doom is that doom has some way to keep track of which buffers should be popups and which shouldn't be.
+So if we can mess with that variable, we can just add our buffer name convention to that and we're done.
+We can use set-popup-rule somewhere in the file to make that work.
+
+Using the ~desc~ key for marginalia annotations in the completion buffer would also be amazing
 ** Processing
 ** More diverse inputs
 # - A way to retrieve and display a list other than completing-read, for spell lists and the like
