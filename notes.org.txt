@@ -1,6 +1,13 @@
 #+TITLE: 5e SRD API Interface
+* <2022-01-01 Sat> Problem-Solving
+** Output
+** Processing
+** More diverse inputs
+# - A way to retrieve and display a list other than completing-read, for spell lists and the like
+- Let users enter a custom endpoint, intelligently handle results
+  + And by intelligent, I basically mean dispatching on the type result. Short lists are displayed, lists of APIReference entities are identified based on structure and handled accordingly.
 
-* COMMENT SRD API interface
+* SRD API interface
 Can we use macros to dynamically define functions? I think we can. Or alternatively, we could just use HOFs to build a bunch of API interface functions. I think macros are nice, actually.
 Because we can have a macro that creates new functions with a unified naming convention and then call those. Actually, naming functions using macros is tricky.
 

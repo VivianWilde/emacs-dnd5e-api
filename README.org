@@ -4,4 +4,5 @@
 An interface to the wonderful [[github:5e-bits/5e-srd-api][D&D 5e SRD API]] from within Emacs. Allows you to quickly look up spells, monsters.
 Work in progress - more to come, hopefully.
 ** Functions
-~dnd5e-api-search~ is the main entry point. Calling that pulls up a ~completing-read~ interface with a list of keys to query. Selecting a field then lists all the entities within that field, such as all the skills in the SRD. Selecting an entity displays some information regarding it in the echo area
+- ~dnd5e-api-search~ is the main entry point. Calling that pulls up a ~completing-read~ interface with a list of keys to query. Selecting a field then lists all the entities within that field, such as all the skills in the SRD. Selecting an entity displays some information regarding it in the echo area
+  - ~dnd5e-api-custom~ is a more primitive entry point. You can call up any endpoint you like in the minibuffer (remember to include the "/api" at the start), and it should return all the data at that endpoint as an alist.

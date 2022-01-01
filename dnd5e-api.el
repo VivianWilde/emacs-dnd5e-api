@@ -26,9 +26,12 @@
 
                                         ; Variable Declarations
 (defvar dnd5e-api-base-url "http://localhost:3000")
+(defvar dnd5e-api-cutoff 20
+
+"If the returned list is > cutoff, we assume it is a list to be browsed via 'completing-read, otherwise we simply display it. Based on the number of keys for a spell entry in the API"
+  )
 
 (defvar dnd5e-api-endpoint-field-hash
-  ;; Hash which links certain endpoints to a list of symbols, where each symbol is a field we care about
   #s(hash-table
      test equal
      data (
@@ -45,7 +48,10 @@
            "/api/conditions" (name desc)
            "/api/rules" (name desc)
            "/api/rule-sections" (name desc)
-           )))
+           ))
+
+  "Hash which links certain endpoints to a list of symbols, where each symbol is a field we care about"
+  )
 
 
                                         ; String processing/input/output
@@ -130,14 +136,20 @@
   )
 ;; Assoc returns nil if nothing is found, rather than raising an error. Which is nice.
 
-(defun dnd5e-api-handle (endpoint)
+(defun dnd5e-api-handle-list (endpoint)
   "Prompt user with a list of all items at ENDPOINT, and then get data for the selected item."
   (let* (
-         (fields (gethash endpoint dnd5e-api-endpoint-field-hash '(name desc)))
+         (fields (gethash endpoint dnd5e-api-endpoint-field-hash '(name desc))) ; NOTE: Should this be (name desc) or just nil?
          (new-endpoint (dnd5e-api-ask-for-item endpoint))
          )
     (dnd5e-api-get new-endpoint fields)))
 
+(defun dnd5e-api-handle-entity (endpoint)
+  "Prompt user with a list of all items at ENDPOINT, and then get data for the selected item."
+  (let* (
+         (fields (gethash endpoint dnd5e-api-endpoint-field-hash '()))
+         )
+    (dnd5e-api-get endpoint fields)))
                                         ; Interactive Components
 ;;;###autoload
 (defun dnd5e-api-search()
@@ -152,14 +164,21 @@
   )
 
                                         ; Put off until tomorrow TODO
-(defun dnd5e-api-get-list (endpoint)
-  "Instead of using completing read, simply return the list of items at ENDPOINT.")
+;; (defun dnd5e-api-get-list (endpoint)
+;;   "Instead of using completing read, simply return the list of items at ENDPOINT.")
 
 (defun dnd5e-api-custom ()
   "Let users pick a custom endpoint and do stuff there."
   (interactive)
   (let* (
-         (endpoint ())))
+         (endpoint (read-string "Endpoint: "))
+         (data (dnd5e-api-get-response endpoint))
+         (result (cond
+                  ((assoc 'results data) (dnd5e-api-handle-list endpoint))
+                  ((dnd5e-api-handle-entity endpoint))))
+         )
+    (dnd5e-api-output result)
+    )
 
   )
 
