@@ -63,8 +63,12 @@
 (defun dnd5e-api-make-prompt (str)
   "Clean STR a bit to make it work as a 'completing-read prompt."
   (let* (
-         (singular (lambda (noun) noun))
-         (make-prompt (lambda (str) (format "%s: " (dnd5e-api-make-readable (singular str)))))
+         (singular (lambda (noun) (cond
+                              ((string-suffix-p "es" noun) (string-trim-right noun (rx "es")))
+                              ((string-suffix-p "s" noun) (string-trim-right noun (rx "s")))
+
+                              )))
+         (make-prompt (lambda (str) (format "%s: " (dnd5e-api-make-readable (funcall singular str)))))
          )
     (funcall make-prompt str))
   )
