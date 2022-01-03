@@ -10,7 +10,7 @@
 ;; Version: 0.0.1
 ;; Keywords: abbrev bib c calendar comm convenience data docs emulations extensions faces files frames games hardware help hypermedia i18n internal languages lisp local maint mail matching mouse multimedia news outlines processes terminals tex tools unix vc wp
 ;; Homepage: https://github.com/rohan/dnd5e-api
-;;  Package-Requires: ((emacs "25.1") (dash "0.0") (ht "0.0") (s "0.0") (json "0.0") (plz.el "0.0"))
+;;  Package-Requires: ((emacs "25.1") (dash "0.0") (ht "0.0") (s "0.0"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
