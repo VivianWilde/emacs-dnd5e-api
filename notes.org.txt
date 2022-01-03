@@ -11,6 +11,16 @@ We can use set-popup-rule somewhere in the file to make that work.
 
 Using the ~desc~ key for marginalia annotations in the completion buffer would also be amazing
 ** Processing
+Process an alist before printing it.
+*** Basic
+- Turn an alist APIReference into a name.
+- Turn a vector of alists into a plain list of names.
+- Filter out index and url tags
+- Spot the symbol json-false and turn it into false
+- Spot a vector of strings, and concat it into one long string using join.
+
+
+*** Recursive
 ** More diverse inputs
 # - A way to retrieve and display a list other than completing-read, for spell lists and the like
 - Let users enter a custom endpoint, intelligently handle results
