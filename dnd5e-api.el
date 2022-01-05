@@ -64,7 +64,7 @@
   "Clean STR a bit to make it work as a 'completing-read prompt."
   (let* (
          (singular (lambda (noun) (cond
-                                   ((s-suffix? "es" noun) (string-trim-right noun (rx "es")))
+                                   ((s-suffix? "es" noun) (string-trim-right noun (rx "s")))
                                    ((s-suffix? "s" noun) (string-trim-right noun (rx "s")))
                                    (noun))))
          (make-prompt (lambda (str) (format "%s: " (dnd5e-api-make-readable (funcall singular str))))))
@@ -78,7 +78,8 @@
 
     (let ((pp-escape-newlines nil)) (insert (pp-to-string (dnd5e-api-process-response result))))
     (display-buffer (current-buffer))))
-(set-popup-rule! (rx bol "*dnd5e-api-results") :size 0.35 :quit t :select t :ttl nil)
+
+;; ( set-popup-rule! (rx bol "*dnd5e-api-results") :size 0.35 :quit t :select t :ttl nil)
                                         ; API Utilities
 (defun dnd5e-api-get-response (endpoint)
   "One-liner to go from ENDPOINT to a URL."
@@ -207,7 +208,26 @@
 ;; How deeply nested is the resulting JSON? If it's deeply nested, this has to be messy and recursive. Otherwise we can get away with 1-2 passes.
 ;; TODO: It doesn't recursively clean up APIReferences, which are apparently very deeply nested.
 
+                                        ; Simple Utilities
+;;;###autoload
+(defun dnd5e-api-make-function (name)
+  "Spit out a bunch of functions that search through a specific field NAME. Implemented as a function rather than a macro because reasons."
+  (let (
+        (funcname (intern (concat "dnd5e-api-search-" name)))
+        (endpoint (concat "/api/" name)))
+    `(defun ,funcname ()
+       ,(concat "Auto-generated function to search through " name ".")
+       (interactive)
+       (dnd5e-api-output (dnd5e-api-handle-list ,endpoint)))))
 
+;; Generate a bunch of functions
+;;;###autoload
+(let (
+      (fields '("skills" "languages" "classes" "features" "races" "traits" "equipment" "magic-items" "spells" "monsters" "conditions" "rules" "rule-sections")))
+
+  (dolist (field fields)
+    (eval (dnd5e-api-make-function field))))
 
 (provide 'dnd5e-api)
 ;;; dnd5e-api.el ends here
+
