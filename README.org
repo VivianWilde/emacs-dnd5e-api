@@ -1,8 +1,50 @@
 #+TITLE: README
 
 * DnD5e-API
-An interface to the wonderful [[github:5e-bits/5e-srd-api][D&D 5e SRD API]] from within Emacs. Allows you to quickly look up spells, monsters.
-Work in progress - more to come, hopefully.
+An interface to the wonderful [[github:5e-bits/5e-srd-api][D&D 5e SRD API]] from within Emacs. Allows you to quickly look up spells, monsters, features, etc. without leaving your file.
+** Important Note
+By default, the API base url (defined in the var ~dnd5e-api-base-url~) is ~localhost~, since it uses a local copy of the API because I hate waiting. You can either run the DB locally as well, or just redefine the base URL to "http://dnd5eapi.co". The "/api" bits of the URL are handled by the program.
+** Dependencies
+- https://github.com/Wilfred/ht.el
+- https://github.com/alphapapa/plz.el
+- https://github.com/magnars/s.el
+- https://github.com/magnars/dash.el
+- Any vaguely recent version of Emacs with JSON parsing.
+- Uses https://github.com/5e-bits/5e-srd-api for the actual data
+
 ** Functions
-- ~dnd5e-api-search~ is the main entry point. Calling that pulls up a ~completing-read~ interface with a list of keys to query. Selecting a field then lists all the entities within that field, such as all the skills in the SRD. Selecting an entity displays some information regarding it in the echo area
+- ~dnd5e-api-search~ is the main entry point. Calling that pulls up a ~completing-read~ interface with a list of keys to query. Selecting a field then lists all the entities within that field, such as all the skills in the SRD. Selecting an entity creates a new buffer
   - ~dnd5e-api-custom~ is a more primitive entry point. You can call up any endpoint you like in the minibuffer (remember to include the "/api" at the start), and it should return all the data at that endpoint as an alist.
+- It also provides a set of auto-generated functions of the form ~dnd5e-api-search-<name>~ that lets you look up all entries under <name>, where <name> is something like 'monsters', 'spells', etc.
+** Additional Configuration
+I use Doom Emacs, so here's the relevant sections of my config file:
+*** Display Results in a small pop-up window
+#+begin_src elisp
+(set-popup-rule! (rx bol "*dnd5e-api-results") :size 0.3 :quit t :select t :ttl nil)
+#+end_src
+*** Keybindings
+(Uses evil, so leader is SPC or M-SPC)
+#+begin_src elisp
+(map!
+ :map org-mode-map
+ :leader
+(:prefix-map ("l" . "Lookup in API")
+ :desc "Monsters" "m m" #'dnd5e-api-search-monsters
+ :desc "Spells" "s" #'dnd5e-api-search-spells
+ :desc "Races" "r a" #'dnd5e-api-search-races
+ :desc "Rules" "r u" #'dnd5e-api-search-rules
+ :desc "Features" "f" #'dnd5e-api-search-features
+ :desc "Traits" "t" #'dnd5e-api-search-traits
+ :desc "Classes" "c l" #'dnd5e-api-search-classes
+ :desc "Equipment" "e" #'dnd5e-api-search-equipment
+ :desc "Languages" "l" #'dnd5e-api-search-languages
+ :desc "Conditions" "c o" #'dnd5e-api-search-conditions
+ :desc "Magic Items" "m i" #'dnd5e-api-search-magic-items
+ :desc "Rule Sections" "r s" #'dnd5e-api-search-rule-sections
+ :desc "Generic" "RET" #'dnd5e-api-search))
+#+end_src
+
+** Modifying
+Most of the choices on which fields are included and which endpoints are available by default are defined in the hashtable ~dnd5e-api-endpoint-field-hash~, where the keys are the API endpoints and the values are lists of relevant fields. I will probably make that customizable soon, but until then just tinker with the variable using a ~setq~ in your init file, or in the package code itself.
+
+You can also alter the function which takes in the JSON response and actually outputs it, if you want to output it to a file or a new frame or insert it at point in the current buffer or something.

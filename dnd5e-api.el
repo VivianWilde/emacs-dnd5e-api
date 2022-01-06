@@ -25,6 +25,7 @@
 (require 'ht)
 (require 'dash)
 (require 's)
+(require 'json)
 
                                         ; Variable Declarations
 (defvar dnd5e-api-base-url "http://localhost:3000")
@@ -91,6 +92,7 @@
          (response (dnd5e-api-get-response endpoint))
          (results (alist-get 'results response)))
     results))
+
 (defun dnd5e-api-ask-for-item (endpoint)
   "Let user choose an item from ENDPOINT via 'completing-read, and return a new endpoint pointing to that item."
   (let* (
@@ -111,6 +113,7 @@
                         (push (alist-get 'name alist) keylist)))))
     (mapc converter seq)
     (list hashtable keylist)))
+
 (defun dnd5e-api-get-keys (endpoint keys)
   "Given an ENDPOINT return an alist containing data from that ENDPOINT at specified KEYS. If key does not exist, it is ignored."
   (let* (
@@ -201,14 +204,10 @@
      ;; ((listp val) (cons (dnd5e-api-process-response (car val)) (dnd5e-api-process-response (cdr val))))
      (val))))
 
-
-
-;;  Define simple processors for things like cost, other common models. Also turning desc from a vector into a string
-;; Once we have the cleaned up assoc-list, we basically need to format it to text and then display it.
 ;; How deeply nested is the resulting JSON? If it's deeply nested, this has to be messy and recursive. Otherwise we can get away with 1-2 passes.
 ;; TODO: It doesn't recursively clean up APIReferences, which are apparently very deeply nested.
 
-                                        ; Simple Utilities
+                                        ; Utilities
 ;;;###autoload
 (defun dnd5e-api-make-function (name)
   "Spit out a bunch of functions that search through a specific field NAME. Implemented as a function rather than a macro because reasons."
